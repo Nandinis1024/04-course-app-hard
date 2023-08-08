@@ -1,4 +1,3 @@
-Sure, here's a README to help understand the provided code:
 
 # Course Management Application
 

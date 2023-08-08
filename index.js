@@ -1,3 +1,5 @@
+
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
@@ -25,7 +27,8 @@ db.once("open",()=> {
     });
 
 
-const secretKey = "kittyxoxo12345678";
+const secretKey = process.env.SECRET_KEY;
+
 
 const generateJwt = (user) => {
   const payload = { username: user };

@@ -27,7 +27,7 @@ db.once("open",()=> {
 // ... (Routes for admin signup, login, course management)
   app.use("/admin", admin);
 // ... (Routes for user signup, login, course selection, etc.)  
-  app.use('/users', users);
+  app.use("/users", users);
 
 // Start the Express server
 app.listen(port, () => {

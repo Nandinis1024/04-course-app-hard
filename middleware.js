@@ -1,6 +1,7 @@
 // Import required modules and dependencies
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const { adminSchema, userSchema, courseSchema } = require("./schemas");
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -23,3 +24,38 @@ module.exports.authenticateJwt = (req, res, next) => {
       res.sendStatus(401); // Unauthorized if no token provided
     }
   };
+
+
+
+
+
+  module.exports.validateAdmin = (req, res, next) => {
+    const { error } = adminSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',')
+        res.send(msg);
+    } else {
+        next();
+    }
+}
+
+
+module.exports.validateUser = (req, res, next) => {
+  const { error } = userSchema.validate(req.body);
+  if (error) {
+      const msg = error.details.map(el => el.message).join(',')
+      res.send(msg);
+  } else {
+      next();
+  }
+}
+
+module.exports.validateCourse = (req, res, next) => {
+  const { error } = courseSchema.validate(req.body);
+  if (error) {
+      const msg = error.details.map(el => el.message).join(',')
+      res.send(msg);
+  } else {
+      next();
+  }
+}

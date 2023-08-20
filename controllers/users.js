@@ -4,6 +4,7 @@ const Admin = require("../models/admin");
 const Course = require("../models/course");
 const User = require("../models/user");
 const { generateJwt } = require("../auth");
+const { userSchema } = require("../schemas");
 
 const app = express();
 

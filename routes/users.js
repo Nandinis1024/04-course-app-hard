@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { authenticateJwt } = require("../middleware");
+const { authenticateJwt, validateUser } = require("../middleware");
 const users = require("../controllers/users");
 
 
@@ -8,9 +8,9 @@ const users = require("../controllers/users");
 
 
 //routes
-router.post('/signup', users.createUser);
+router.post('/signup', validateUser, users.createUser);
   
-  router.post('/login', users.loginUser);
+  router.post('/login', validateUser, users.loginUser);
   
   router.get('/courses', authenticateJwt, users.viewCourses);
   

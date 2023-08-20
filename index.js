@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const admin = require('./routes/admin');
 const users = require('./routes/users');
+const ExpressError = require('./utils/ExpressError');
 
 // Initialize Express app
 const app = express();
@@ -28,6 +29,18 @@ db.once("open",()=> {
   app.use("/admin", admin);
 // ... (Routes for user signup, login, course selection, etc.)  
   app.use("/users", users);
+
+
+//Error handling
+app.all("*",(req, res, next)=>{
+  next(new ExpressError("page not found", 404))
+})
+app.use((err, req, res, next)=>{
+  const { statusCode = 500 }= err;
+  if(!err.message) err.message = "oh boy! something went wrong";
+  res.status(statusCode).render("campgrounds/error", {err});
+})
+
 
 // Start the Express server
 app.listen(port, () => {

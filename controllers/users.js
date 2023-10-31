@@ -13,6 +13,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+module.exports.renderSignup = async (req, res) => {
+    res.render('createUser');
+  }
+
+
 module.exports.createUser = async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
@@ -29,18 +34,21 @@ module.exports.createUser = async (req, res) => {
     }
   }
 
-
+  module.exports.renderLogin = async (req, res) => {
+    res.render('loginUser');
+  }
 
   module.exports.loginUser = async (req, res) => {
-    const username = req.headers.username;
-    const password = req.headers.password;
-    const isUser = await User.find({username: username});
-    if(isUser){
-      const token = await generateJwt(username);
-      res.json({message: "User logged in successfully", token});
+    const username = req.body.username;
+    const password = req.body.password;
+    const isUser = await User.findOne({username: username});
+    if(!isUser){
+      return res.status(401).send('Invalid credentials');
     }
     else{
-      return res.status(401).send('Invalid credentials');
+      const token = await generateJwt(username);
+      res.cookie('token', token, { httpOnly: false });
+      res.json({message: "User logged in successfully", token});
     }
   }
 
@@ -48,10 +56,14 @@ module.exports.createUser = async (req, res) => {
 
   module.exports.viewCourses = async (req, res) => {
     const courses = await Course.find({});
-    res.json({courses});
+    res.render('viewCourse', {courses: courses});
   }
 
-
+  module.exports.renderBuyCourse = async (req, res) => {
+    const id = req.params.courseId;
+    const course = await Course.findById({ _id: id });
+    res.render('buyCourse', { course: course });
+  }
 
 
  module.exports.buyCourse = async (req, res) => {
@@ -82,9 +94,9 @@ module.exports.createUser = async (req, res) => {
   module.exports.viewPurchase = async (req, res) => {
     //console.log(req.user);
     const user = await User.findOne({username: req.user.username}).populate('courses');
-    console.log(user);
+    //console.log(user);
     if(user){
-      res.json({courses: user.courses});
+      res.render('viewPurchase', {courses: user.courses});
     }
     else{
       res.json({error:'User not found'});

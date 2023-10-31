@@ -3,15 +3,25 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const admin = require('./routes/admin');
 const users = require('./routes/users');
+const ejsMate = require("ejs-mate");
 const ExpressError = require('./utils/ExpressError');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const methodOverride = require('method-override');
 
 // Initialize Express app
 const app = express();
 const port = 3000;
 
 // Set up middleware to parse JSON and URL-encoded data
+app.use(cookieParser());
+app.engine('ejs', ejsMate)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static('public'));
 
 // Connect to MongoDB database
 mongoose.connect('mongodb://127.0.0.1:27017/course-app',{
@@ -35,10 +45,12 @@ db.once("open",()=> {
 app.all("*",(req, res, next)=>{
   next(new ExpressError("page not found", 404))
 })
+
+
 app.use((err, req, res, next)=>{
   const { statusCode = 500 }= err;
   if(!err.message) err.message = "oh boy! something went wrong";
-  res.status(statusCode).render("campgrounds/error", {err});
+  res.status(statusCode).send(err.message);
 })
 
 

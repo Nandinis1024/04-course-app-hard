@@ -6,50 +6,61 @@ const User = require("../models/user");
 const { generateJwt } = require("../auth");
 const { adminSchema } = require("../schemas");
 
+
 const app = express();
 
 // Set up middleware to parse JSON and URL-encoded data
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-module.exports.createAdmin = async (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-    if (username == process.env.ADMIN_USERNAME && password == process.env.ADMIN_PASSWORD) {
-      const ifAdmin = await Admin.findOne({username: username, password: password});
-      if(!ifAdmin){
-      const admin = new Admin({username: username, password: password});
-      await admin.save();
-        try {
-        const token = await generateJwt(username);
-        console.log("Admin is successfully registered");
-        res.send(token);
-      } catch (error) {
-        res.sendStatus(500);
-      }
-    } 
-      else{
-      console.log('admin already exists');
-    }
-  }
-    else {
-      console.log("Eh! these ain't correct credentials to signup as admin bitch. WALK AWAY!!")
-      res.sendStatus(403);
-    }
-  }
 
+module.exports.renderSignup = (req, res) => {
+  res.render('createAdmin');
+}
+
+module.exports.createAdmin = async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+    const ifAdmin = await Admin.findOne({ username: username, password: password });
+
+    if (!ifAdmin) {
+      const admin = new Admin({ username: username, password: password });
+      await admin.save();
+
+      try {
+        const token = await generateJwt(username);
+        res.json({ message: "Admin is successfully registered", token });
+      } catch (error) {
+        res.status(500).json({ message: "Internal Server Error" });
+      }
+    } else {
+      res.json({ message: "Admin already exists" });
+    }
+  } else {
+    res.status(403).json({ message: "Invalid credentials to sign up as admin" });
+  }
+}
+
+
+module.exports.renderLogin = (req, res) => {
+  res.render('loginAdmin');
+}
 
 
 
 
   module.exports.loginAdmin = async (req, res) => {
-    const username = req.headers.username;
-    const password = req.headers.password;
+    const username = req.body.username;
+    const password = req.body.password;
     const isAdmin = await Admin.findOne({username: username, password: password});
 
     if(isAdmin){
       const token = await generateJwt(username);
       //console.log(token);
+      res.cookie('token', token, { httpOnly: false });
       res.json({ message: 'Logged in successfully', token });
     }
     else{
@@ -58,7 +69,9 @@ module.exports.createAdmin = async (req, res) => {
   }
 
 
-
+module.exports.renderCreateCourses = (req, res) => {
+  res.render('createCourse');
+}
 
 
   module.exports.createCourses = async (req, res) => {
@@ -83,11 +96,15 @@ module.exports.createAdmin = async (req, res) => {
   }
 
 
-
+module.exports.renderEditCourse = async (req, res) => {
+  const id = req.params.courseId;
+  const course = await Course.findById({ _id: id });
+  res.render('editCourse', { course: course });
+}
 
   module.exports.viewCourses = async (req, res) => {
     const courses = await Course.find({});
-    res.json(courses);
+    res.render('viewCourse', { courses: courses });
   }
 
 

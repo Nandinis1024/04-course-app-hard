@@ -8,16 +8,21 @@ const catchAsync = require("../utils/catchAsync");
 
 
 //routes
+router.get('/signup', catchAsync(admin.renderSignup))
 router.post('/signup', validateAdmin, catchAsync(admin.createAdmin));
-  
-router.post('/login', catchAsync(admin.loginAdmin));
 
-router.route('/courses')
-    .get(catchAsync(admin.viewCourses))
-    .post(authenticateJwt, validateCourse, catchAsync(admin.createCourses))
 
-  
-router.put('/courses/:courseId', authenticateJwt, validateCourse, catchAsync(admin.editCourse));
+router.get('/login', catchAsync(admin.renderLogin))
+router.post('/login', catchAsync(admin.loginAdmin));    
+    
+
+router.get('/courses', catchAsync(admin.viewCourses))
+
+router.get('/createCourses', authenticateJwt, catchAsync(admin.renderCreateCourses))
+router.post('/createCourses', authenticateJwt, validateCourse, catchAsync(admin.createCourses))
+
+router.get('/courses/:courseId', authenticateJwt, catchAsync(admin.renderEditCourse))  
+router.post('/courses/:courseId', authenticateJwt, catchAsync(admin.editCourse));
   
 
   
